@@ -25,6 +25,7 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/gomega"
 
+	infrav1 "sigs.k8s.io/cluster-api-provider-azure/api/v1alpha3"
 	azure "sigs.k8s.io/cluster-api-provider-azure/cloud"
 	"sigs.k8s.io/cluster-api-provider-azure/cloud/mocks"
 	"sigs.k8s.io/cluster-api-provider-azure/cloud/scope"
@@ -32,7 +33,7 @@ import (
 	gomockinternal "sigs.k8s.io/cluster-api-provider-azure/internal/test/matchers/gomock"
 )
 
-type expect func(grp *mocks.MockServiceMockRecorder, vnet *mocks.MockServiceMockRecorder, sg *mocks.MockServiceMockRecorder, rt *mocks.MockServiceMockRecorder, sn *mocks.MockServiceMockRecorder, pip *mocks.MockServiceMockRecorder, lb *mocks.MockServiceMockRecorder, dns *mocks.MockServiceMockRecorder)
+type expect func(grp *mocks.MockServiceMockRecorder, vnet *mocks.MockServiceMockRecorder, sg *mocks.MockServiceMockRecorder, rt *mocks.MockServiceMockRecorder, sn *mocks.MockServiceMockRecorder, pip *mocks.MockServiceMockRecorder, lb *mocks.MockServiceMockRecorder, dns *mocks.MockServiceMockRecorder, as *mocks.MockServiceMockRecorder)
 
 func TestAzureClusterReconcilerDelete(t *testing.T) {
 	cases := map[string]struct {
@@ -41,21 +42,21 @@ func TestAzureClusterReconcilerDelete(t *testing.T) {
 	}{
 		"Resource Group is deleted successfully": {
 			expectedError: "",
-			expect: func(grp *mocks.MockServiceMockRecorder, vnet *mocks.MockServiceMockRecorder, sg *mocks.MockServiceMockRecorder, rt *mocks.MockServiceMockRecorder, sn *mocks.MockServiceMockRecorder, pip *mocks.MockServiceMockRecorder, lb *mocks.MockServiceMockRecorder, dns *mocks.MockServiceMockRecorder) {
+			expect: func(grp *mocks.MockServiceMockRecorder, vnet *mocks.MockServiceMockRecorder, sg *mocks.MockServiceMockRecorder, rt *mocks.MockServiceMockRecorder, sn *mocks.MockServiceMockRecorder, pip *mocks.MockServiceMockRecorder, lb *mocks.MockServiceMockRecorder, dns *mocks.MockServiceMockRecorder, as *mocks.MockServiceMockRecorder) {
 				gomock.InOrder(
 					grp.Delete(gomockinternal.AContext()).Return(nil))
 			},
 		},
 		"Resource Group delete fails": {
 			expectedError: "failed to delete resource group: internal error",
-			expect: func(grp *mocks.MockServiceMockRecorder, vnet *mocks.MockServiceMockRecorder, sg *mocks.MockServiceMockRecorder, rt *mocks.MockServiceMockRecorder, sn *mocks.MockServiceMockRecorder, pip *mocks.MockServiceMockRecorder, lb *mocks.MockServiceMockRecorder, dns *mocks.MockServiceMockRecorder) {
+			expect: func(grp *mocks.MockServiceMockRecorder, vnet *mocks.MockServiceMockRecorder, sg *mocks.MockServiceMockRecorder, rt *mocks.MockServiceMockRecorder, sn *mocks.MockServiceMockRecorder, pip *mocks.MockServiceMockRecorder, lb *mocks.MockServiceMockRecorder, dns *mocks.MockServiceMockRecorder, as *mocks.MockServiceMockRecorder) {
 				gomock.InOrder(
 					grp.Delete(gomockinternal.AContext()).Return(errors.New("internal error")))
 			},
 		},
 		"Resource Group not owned by cluster": {
 			expectedError: "",
-			expect: func(grp *mocks.MockServiceMockRecorder, vnet *mocks.MockServiceMockRecorder, sg *mocks.MockServiceMockRecorder, rt *mocks.MockServiceMockRecorder, sn *mocks.MockServiceMockRecorder, pip *mocks.MockServiceMockRecorder, lb *mocks.MockServiceMockRecorder, dns *mocks.MockServiceMockRecorder) {
+			expect: func(grp *mocks.MockServiceMockRecorder, vnet *mocks.MockServiceMockRecorder, sg *mocks.MockServiceMockRecorder, rt *mocks.MockServiceMockRecorder, sn *mocks.MockServiceMockRecorder, pip *mocks.MockServiceMockRecorder, lb *mocks.MockServiceMockRecorder, dns *mocks.MockServiceMockRecorder, as *mocks.MockServiceMockRecorder) {
 				gomock.InOrder(
 					grp.Delete(gomockinternal.AContext()).Return(azure.ErrNotOwned),
 					dns.Delete(gomockinternal.AContext()),
@@ -65,12 +66,13 @@ func TestAzureClusterReconcilerDelete(t *testing.T) {
 					rt.Delete(gomockinternal.AContext()),
 					sg.Delete(gomockinternal.AContext()),
 					vnet.Delete(gomockinternal.AContext()),
+					as.Delete(gomockinternal.AContext()),
 				)
 			},
 		},
 		"Load Balancer delete fails": {
 			expectedError: "failed to delete load balancer: some error happened",
-			expect: func(grp *mocks.MockServiceMockRecorder, vnet *mocks.MockServiceMockRecorder, sg *mocks.MockServiceMockRecorder, rt *mocks.MockServiceMockRecorder, sn *mocks.MockServiceMockRecorder, pip *mocks.MockServiceMockRecorder, lb *mocks.MockServiceMockRecorder, dns *mocks.MockServiceMockRecorder) {
+			expect: func(grp *mocks.MockServiceMockRecorder, vnet *mocks.MockServiceMockRecorder, sg *mocks.MockServiceMockRecorder, rt *mocks.MockServiceMockRecorder, sn *mocks.MockServiceMockRecorder, pip *mocks.MockServiceMockRecorder, lb *mocks.MockServiceMockRecorder, dns *mocks.MockServiceMockRecorder, as *mocks.MockServiceMockRecorder) {
 				gomock.InOrder(
 					grp.Delete(gomockinternal.AContext()).Return(azure.ErrNotOwned),
 					dns.Delete(gomockinternal.AContext()),
@@ -80,7 +82,7 @@ func TestAzureClusterReconcilerDelete(t *testing.T) {
 		},
 		"Route table delete fails": {
 			expectedError: "failed to delete route table: some error happened",
-			expect: func(grp *mocks.MockServiceMockRecorder, vnet *mocks.MockServiceMockRecorder, sg *mocks.MockServiceMockRecorder, rt *mocks.MockServiceMockRecorder, sn *mocks.MockServiceMockRecorder, pip *mocks.MockServiceMockRecorder, lb *mocks.MockServiceMockRecorder, dns *mocks.MockServiceMockRecorder) {
+			expect: func(grp *mocks.MockServiceMockRecorder, vnet *mocks.MockServiceMockRecorder, sg *mocks.MockServiceMockRecorder, rt *mocks.MockServiceMockRecorder, sn *mocks.MockServiceMockRecorder, pip *mocks.MockServiceMockRecorder, lb *mocks.MockServiceMockRecorder, dns *mocks.MockServiceMockRecorder, as *mocks.MockServiceMockRecorder) {
 				gomock.InOrder(
 					grp.Delete(gomockinternal.AContext()).Return(azure.ErrNotOwned),
 					dns.Delete(gomockinternal.AContext()),
@@ -88,6 +90,22 @@ func TestAzureClusterReconcilerDelete(t *testing.T) {
 					pip.Delete(gomockinternal.AContext()),
 					sn.Delete(gomockinternal.AContext()),
 					rt.Delete(gomockinternal.AContext()).Return(errors.New("some error happened")),
+				)
+			},
+		},
+		"Availability sets delete fails": {
+			expectedError: "failed to delete availability sets: some error happened",
+			expect: func(grp *mocks.MockServiceMockRecorder, vnet *mocks.MockServiceMockRecorder, sg *mocks.MockServiceMockRecorder, rt *mocks.MockServiceMockRecorder, sn *mocks.MockServiceMockRecorder, pip *mocks.MockServiceMockRecorder, lb *mocks.MockServiceMockRecorder, dns *mocks.MockServiceMockRecorder, as *mocks.MockServiceMockRecorder) {
+				gomock.InOrder(
+					grp.Delete(gomockinternal.AContext()).Return(azure.ErrNotOwned),
+					dns.Delete(gomockinternal.AContext()),
+					lb.Delete(gomockinternal.AContext()),
+					pip.Delete(gomockinternal.AContext()),
+					sn.Delete(gomockinternal.AContext()),
+					rt.Delete(gomockinternal.AContext()),
+					sg.Delete(gomockinternal.AContext()),
+					vnet.Delete(gomockinternal.AContext()),
+					as.Delete(gomockinternal.AContext()).Return(errors.New("some error happened")),
 				)
 			},
 		},
@@ -109,20 +127,22 @@ func TestAzureClusterReconcilerDelete(t *testing.T) {
 			publicIPMock := mocks.NewMockService(mockCtrl)
 			lbMock := mocks.NewMockService(mockCtrl)
 			dnsMock := mocks.NewMockService(mockCtrl)
+			asMock := mocks.NewMockService(mockCtrl)
 
-			tc.expect(groupsMock.EXPECT(), vnetMock.EXPECT(), sgMock.EXPECT(), rtMock.EXPECT(), subnetsMock.EXPECT(), publicIPMock.EXPECT(), lbMock.EXPECT(), dnsMock.EXPECT())
+			tc.expect(groupsMock.EXPECT(), vnetMock.EXPECT(), sgMock.EXPECT(), rtMock.EXPECT(), subnetsMock.EXPECT(), publicIPMock.EXPECT(), lbMock.EXPECT(), dnsMock.EXPECT(), asMock.EXPECT())
 
 			r := &azureClusterReconciler{
-				scope:            &scope.ClusterScope{},
-				groupsSvc:        groupsMock,
-				vnetSvc:          vnetMock,
-				securityGroupSvc: sgMock,
-				routeTableSvc:    rtMock,
-				subnetsSvc:       subnetsMock,
-				publicIPSvc:      publicIPMock,
-				loadBalancerSvc:  lbMock,
-				privateDNSSvc:    dnsMock,
-				skuCache:         resourceskus.NewStaticCache([]compute.ResourceSku{}),
+				scope:               &scope.ClusterScope{AzureCluster: &infrav1.AzureCluster{}},
+				groupsSvc:           groupsMock,
+				vnetSvc:             vnetMock,
+				securityGroupSvc:    sgMock,
+				routeTableSvc:       rtMock,
+				subnetsSvc:          subnetsMock,
+				publicIPSvc:         publicIPMock,
+				loadBalancerSvc:     lbMock,
+				privateDNSSvc:       dnsMock,
+				availabilitySetsSvc: asMock,
+				skuCache:            resourceskus.NewStaticCache([]compute.ResourceSku{}),
 			}
 
 			err := r.Delete(context.TODO())

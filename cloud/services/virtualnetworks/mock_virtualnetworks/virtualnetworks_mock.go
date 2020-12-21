@@ -27,6 +27,7 @@ import (
 	reflect "reflect"
 	v1alpha3 "sigs.k8s.io/cluster-api-provider-azure/api/v1alpha3"
 	azure "sigs.k8s.io/cluster-api-provider-azure/cloud"
+	v1alpha30 "sigs.k8s.io/cluster-api/api/v1alpha3"
 )
 
 // MockVNetScope is a mock of VNetScope interface.
@@ -298,6 +299,20 @@ func (m *MockVNetScope) AdditionalTags() v1alpha3.Tags {
 func (mr *MockVNetScopeMockRecorder) AdditionalTags() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdditionalTags", reflect.TypeOf((*MockVNetScope)(nil).AdditionalTags))
+}
+
+// FailureDomains mocks base method.
+func (m *MockVNetScope) FailureDomains() v1alpha30.FailureDomains {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FailureDomains")
+	ret0, _ := ret[0].(v1alpha30.FailureDomains)
+	return ret0
+}
+
+// FailureDomains indicates an expected call of FailureDomains.
+func (mr *MockVNetScopeMockRecorder) FailureDomains() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FailureDomains", reflect.TypeOf((*MockVNetScope)(nil).FailureDomains))
 }
 
 // Vnet mocks base method.

@@ -26,6 +26,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 	v1alpha3 "sigs.k8s.io/cluster-api-provider-azure/api/v1alpha3"
+	v1alpha30 "sigs.k8s.io/cluster-api/api/v1alpha3"
 )
 
 // MockGroupScope is a mock of GroupScope interface.
@@ -297,4 +298,18 @@ func (m *MockGroupScope) AdditionalTags() v1alpha3.Tags {
 func (mr *MockGroupScopeMockRecorder) AdditionalTags() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdditionalTags", reflect.TypeOf((*MockGroupScope)(nil).AdditionalTags))
+}
+
+// FailureDomains mocks base method.
+func (m *MockGroupScope) FailureDomains() v1alpha30.FailureDomains {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FailureDomains")
+	ret0, _ := ret[0].(v1alpha30.FailureDomains)
+	return ret0
+}
+
+// FailureDomains indicates an expected call of FailureDomains.
+func (mr *MockGroupScopeMockRecorder) FailureDomains() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FailureDomains", reflect.TypeOf((*MockGroupScope)(nil).FailureDomains))
 }

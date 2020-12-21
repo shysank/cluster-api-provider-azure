@@ -182,3 +182,9 @@ type PrivateDNSSpec struct {
 	LinkName          string
 	Records           []infrav1.AddressRecord
 }
+
+// AvailabilitySetSpec defines the specification for an availability set.
+type AvailabilitySetSpec struct {
+	Name                    string
+	DesiredFaultDomainCount int32
+}

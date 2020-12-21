@@ -20,7 +20,9 @@ import (
 	"context"
 
 	"github.com/Azure/go-autorest/autorest"
+
 	infrav1 "sigs.k8s.io/cluster-api-provider-azure/api/v1alpha3"
+	clusterv1 "sigs.k8s.io/cluster-api/api/v1alpha3"
 )
 
 // Service is a generic interface used by components offering a type of service.
@@ -79,6 +81,7 @@ type ClusterDescriber interface {
 	ClusterName() string
 	Location() string
 	AdditionalTags() infrav1.Tags
+	FailureDomains() clusterv1.FailureDomains
 }
 
 // ClusterScoper combines the ClusterDescriber and NetworkDescriber interfaces.

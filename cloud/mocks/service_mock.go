@@ -26,6 +26,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 	v1alpha3 "sigs.k8s.io/cluster-api-provider-azure/api/v1alpha3"
+	v1alpha30 "sigs.k8s.io/cluster-api/api/v1alpha3"
 )
 
 // MockService is a mock of Service interface.
@@ -685,6 +686,20 @@ func (mr *MockClusterDescriberMockRecorder) AdditionalTags() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdditionalTags", reflect.TypeOf((*MockClusterDescriber)(nil).AdditionalTags))
 }
 
+// FailureDomains mocks base method.
+func (m *MockClusterDescriber) FailureDomains() v1alpha30.FailureDomains {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FailureDomains")
+	ret0, _ := ret[0].(v1alpha30.FailureDomains)
+	return ret0
+}
+
+// FailureDomains indicates an expected call of FailureDomains.
+func (mr *MockClusterDescriberMockRecorder) FailureDomains() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FailureDomains", reflect.TypeOf((*MockClusterDescriber)(nil).FailureDomains))
+}
+
 // MockClusterScoper is a mock of ClusterScoper interface.
 type MockClusterScoper struct {
 	ctrl     *gomock.Controller
@@ -860,6 +875,20 @@ func (m *MockClusterScoper) AdditionalTags() v1alpha3.Tags {
 func (mr *MockClusterScoperMockRecorder) AdditionalTags() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdditionalTags", reflect.TypeOf((*MockClusterScoper)(nil).AdditionalTags))
+}
+
+// FailureDomains mocks base method.
+func (m *MockClusterScoper) FailureDomains() v1alpha30.FailureDomains {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FailureDomains")
+	ret0, _ := ret[0].(v1alpha30.FailureDomains)
+	return ret0
+}
+
+// FailureDomains indicates an expected call of FailureDomains.
+func (mr *MockClusterScoperMockRecorder) FailureDomains() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FailureDomains", reflect.TypeOf((*MockClusterScoper)(nil).FailureDomains))
 }
 
 // Vnet mocks base method.

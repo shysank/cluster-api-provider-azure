@@ -29,6 +29,7 @@ import (
 	reflect "reflect"
 	v1alpha3 "sigs.k8s.io/cluster-api-provider-azure/api/v1alpha3"
 	azure "sigs.k8s.io/cluster-api-provider-azure/cloud"
+	v1alpha30 "sigs.k8s.io/cluster-api/api/v1alpha3"
 )
 
 // MockVMScope is a mock of VMScope interface.
@@ -302,6 +303,20 @@ func (mr *MockVMScopeMockRecorder) AdditionalTags() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdditionalTags", reflect.TypeOf((*MockVMScope)(nil).AdditionalTags))
 }
 
+// FailureDomains mocks base method.
+func (m *MockVMScope) FailureDomains() v1alpha30.FailureDomains {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FailureDomains")
+	ret0, _ := ret[0].(v1alpha30.FailureDomains)
+	return ret0
+}
+
+// FailureDomains indicates an expected call of FailureDomains.
+func (mr *MockVMScopeMockRecorder) FailureDomains() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FailureDomains", reflect.TypeOf((*MockVMScope)(nil).FailureDomains))
+}
+
 // VMSpec mocks base method.
 func (m *MockVMScope) VMSpec() azure.VMSpec {
 	m.ctrl.T.Helper()
@@ -370,6 +385,21 @@ func (m *MockVMScope) ProviderID() string {
 func (mr *MockVMScopeMockRecorder) ProviderID() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProviderID", reflect.TypeOf((*MockVMScope)(nil).ProviderID))
+}
+
+// AvailabilitySet mocks base method.
+func (m *MockVMScope) AvailabilitySet() (string, bool) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AvailabilitySet")
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(bool)
+	return ret0, ret1
+}
+
+// AvailabilitySet indicates an expected call of AvailabilitySet.
+func (mr *MockVMScopeMockRecorder) AvailabilitySet() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AvailabilitySet", reflect.TypeOf((*MockVMScope)(nil).AvailabilitySet))
 }
 
 // SetProviderID mocks base method.

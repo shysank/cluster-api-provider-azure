@@ -29,6 +29,7 @@ import (
 	v1alpha3 "sigs.k8s.io/cluster-api-provider-azure/api/v1alpha3"
 	azure "sigs.k8s.io/cluster-api-provider-azure/cloud"
 	v1alpha30 "sigs.k8s.io/cluster-api-provider-azure/exp/api/v1alpha3"
+	v1alpha31 "sigs.k8s.io/cluster-api/api/v1alpha3"
 )
 
 // MockScaleSetScope is a mock of ScaleSetScope interface.
@@ -300,6 +301,20 @@ func (m *MockScaleSetScope) AdditionalTags() v1alpha3.Tags {
 func (mr *MockScaleSetScopeMockRecorder) AdditionalTags() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdditionalTags", reflect.TypeOf((*MockScaleSetScope)(nil).AdditionalTags))
+}
+
+// FailureDomains mocks base method.
+func (m *MockScaleSetScope) FailureDomains() v1alpha31.FailureDomains {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FailureDomains")
+	ret0, _ := ret[0].(v1alpha31.FailureDomains)
+	return ret0
+}
+
+// FailureDomains indicates an expected call of FailureDomains.
+func (mr *MockScaleSetScopeMockRecorder) FailureDomains() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FailureDomains", reflect.TypeOf((*MockScaleSetScope)(nil).FailureDomains))
 }
 
 // ScaleSetSpec mocks base method.

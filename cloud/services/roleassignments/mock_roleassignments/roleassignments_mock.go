@@ -27,6 +27,7 @@ import (
 	reflect "reflect"
 	v1alpha3 "sigs.k8s.io/cluster-api-provider-azure/api/v1alpha3"
 	azure "sigs.k8s.io/cluster-api-provider-azure/cloud"
+	v1alpha30 "sigs.k8s.io/cluster-api/api/v1alpha3"
 )
 
 // MockRoleAssignmentScope is a mock of RoleAssignmentScope interface.
@@ -298,6 +299,20 @@ func (m *MockRoleAssignmentScope) AdditionalTags() v1alpha3.Tags {
 func (mr *MockRoleAssignmentScopeMockRecorder) AdditionalTags() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AdditionalTags", reflect.TypeOf((*MockRoleAssignmentScope)(nil).AdditionalTags))
+}
+
+// FailureDomains mocks base method.
+func (m *MockRoleAssignmentScope) FailureDomains() v1alpha30.FailureDomains {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FailureDomains")
+	ret0, _ := ret[0].(v1alpha30.FailureDomains)
+	return ret0
+}
+
+// FailureDomains indicates an expected call of FailureDomains.
+func (mr *MockRoleAssignmentScopeMockRecorder) FailureDomains() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FailureDomains", reflect.TypeOf((*MockRoleAssignmentScope)(nil).FailureDomains))
 }
 
 // RoleAssignmentSpecs mocks base method.

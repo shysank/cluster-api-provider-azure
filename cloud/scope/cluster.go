@@ -258,6 +258,14 @@ func (s *ClusterScope) PrivateDNSSpec() *azure.PrivateDNSSpec {
 	return spec
 }
 
+// AvailabilitySetSpecs returns the availability set specs.
+func (s *ClusterScope) AvailabilitySetSpecs() []azure.AvailabilitySetSpec {
+	return []azure.AvailabilitySetSpec{{
+		Name:                    azure.GenerateAvailabilitySetName(s.ClusterName(), azure.ControlPlaneNodeGroup),
+		DesiredFaultDomainCount: azure.DefaultFaultDomainCount,
+	}}
+}
+
 // Vnet returns the cluster Vnet.
 func (s *ClusterScope) Vnet() *infrav1.VnetSpec {
 	return &s.AzureCluster.Spec.NetworkSpec.Vnet
@@ -451,6 +459,11 @@ func (s *ClusterScope) APIServerHost() string {
 		return azure.GeneratePrivateFQDN(s.ClusterName())
 	}
 	return s.APIServerPublicIP().DNSName
+}
+
+// FailureDomains returns a list of failure domains available for the cluster's location
+func (s *ClusterScope) FailureDomains() clusterv1.FailureDomains {
+	return s.AzureCluster.Status.FailureDomains
 }
 
 // SetFailureDomain will set the spec for a for a given key

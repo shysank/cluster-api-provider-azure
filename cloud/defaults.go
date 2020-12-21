@@ -49,6 +49,14 @@ const (
 	PrivateAPIServerHostname = "apiserver"
 )
 
+const (
+	// ControlPlaneNodeGroup will be used to create availability set for control plane machines
+	ControlPlaneNodeGroup = "control-plane"
+
+	// DefaultFaultDomainCount will be used to set fault domain count for availability sets
+	DefaultFaultDomainCount int32 = 3
+)
+
 // GenerateBackendAddressPoolName generates a load balancer backend address pool name.
 func GenerateBackendAddressPoolName(lbName string) string {
 	return fmt.Sprintf("%s-%s", lbName, "backendPool")
@@ -117,6 +125,12 @@ func GenerateOSDiskName(machineName string) string {
 // GenerateDataDiskName generates the name of a data disk based on the name of a VM.
 func GenerateDataDiskName(machineName, nameSuffix string) string {
 	return fmt.Sprintf("%s_%s", machineName, nameSuffix)
+}
+
+// GenerateAvailabilitySetName generates the name of a availability set based on the cluster name and the node group
+// node group identifies the set of nodes that belong to this availability sets. Eg. control-plane
+func GenerateAvailabilitySetName(clusterName, nodeGroup string) string {
+	return fmt.Sprintf("%s_%s-as", clusterName, nodeGroup)
 }
 
 // VMID returns the azure resource ID for a given VM.
