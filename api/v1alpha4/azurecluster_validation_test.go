@@ -22,6 +22,7 @@ import (
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"k8s.io/utils/pointer"
 )
 
 func TestClusterNameValidation(t *testing.T) {
@@ -317,6 +318,59 @@ func TestNetworkSpecWithoutPreexistingVnetValid(t *testing.T) {
 	}
 
 	testCase.networkSpec.Vnet.ResourceGroup = ""
+
+	t.Run(testCase.name, func(t *testing.T) {
+		errs := validateNetworkSpec(testCase.networkSpec, NetworkSpec{}, field.NewPath("spec").Child("networkSpec"))
+		g.Expect(errs).To(BeNil())
+	})
+}
+
+func TestNetworkSpecWithLoadBalancingNodeOutboundIPsInValid(t *testing.T) {
+	g := NewWithT(t)
+
+	type test struct {
+		name              string
+		networkSpec       NetworkSpec
+		lbNodeOutboundIps *int32
+	}
+
+	testCases := []test{
+		{
+			name:              "azurecluster networkspec with load balancing node outbound ips less than 1 fails",
+			networkSpec:       createValidNetworkSpec(),
+			lbNodeOutboundIps: pointer.Int32Ptr(0),
+		},
+		{
+			name:              "azurecluster networkspec with load balancing node outbound ips greater than max value fails",
+			networkSpec:       createValidNetworkSpec(),
+			lbNodeOutboundIps: pointer.Int32Ptr(100),
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase.networkSpec.LoadBalancerNodeOutboundIPs = testCase.lbNodeOutboundIps
+		t.Run(testCase.name, func(t *testing.T) {
+			errs := validateNetworkSpec(testCase.networkSpec, NetworkSpec{}, field.NewPath("spec").Child("networkSpec"))
+			g.Expect(errs).To(Not(BeNil()))
+		})
+	}
+
+}
+
+func TestNetworkSpecWithLoadBalancingNodeOutboundIPsValid(t *testing.T) {
+	g := NewWithT(t)
+
+	type test struct {
+		name        string
+		networkSpec NetworkSpec
+	}
+
+	testCase := test{
+		name:        "azurecluster networkspec with load balancing node outbound ips - valid",
+		networkSpec: createValidNetworkSpec(),
+	}
+
+	testCase.networkSpec.LoadBalancerNodeOutboundIPs = pointer.Int32Ptr(5)
 
 	t.Run(testCase.name, func(t *testing.T) {
 		errs := validateNetworkSpec(testCase.networkSpec, NetworkSpec{}, field.NewPath("spec").Child("networkSpec"))

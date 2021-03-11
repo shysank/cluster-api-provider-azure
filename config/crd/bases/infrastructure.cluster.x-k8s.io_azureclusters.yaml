@@ -448,6 +448,10 @@ spec:
                         description: LBType defines an Azure load balancer Type.
                         type: string
                     type: object
+                  load_balancer_node_outbound_ips:
+                    description: LoadBalancerNodeOutboundIPs is the configuration for multiple frontend ips for node outbound load balancer.
+                    format: int32
+                    type: integer
                   subnets:
                     description: Subnets is the configuration for the control-plane subnet and the node subnet.
                     items:

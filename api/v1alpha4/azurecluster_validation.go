@@ -38,6 +38,8 @@ const (
 	// described in https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules
 	subnetRegex       = `^[-\w\._]+$`
 	loadBalancerRegex = `^[-\w\._]+$`
+	// MaxLoadBalancerOutboundIPs is the maximum number of outbound IPs in a Standard LoadBalancer frontend configuration
+	MaxLoadBalancerOutboundIPs = 16
 )
 
 // validateCluster validates a cluster
@@ -105,6 +107,11 @@ func validateNetworkSpec(networkSpec NetworkSpec, old NetworkSpec, fldPath *fiel
 	cidrBlocks = subnet.CIDRBlocks
 
 	allErrs = append(allErrs, validateAPIServerLB(networkSpec.APIServerLB, old.APIServerLB, cidrBlocks, fldPath.Child("apiServerLB"))...)
+
+	if err := validateLoadBalancerNodeOutboundIPs(networkSpec, fldPath); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
 	if len(allErrs) == 0 {
 		return nil
 	}
@@ -263,4 +270,22 @@ func validateAPIServerLB(lb LoadBalancerSpec, old LoadBalancerSpec, cidrs []stri
 	}
 
 	return allErrs
+}
+
+func validateLoadBalancerNodeOutboundIPs(networkSpec NetworkSpec, fldPath *field.Path) *field.Error {
+	if networkSpec.LoadBalancerNodeOutboundIPs == nil {
+		return nil
+	}
+
+	if *networkSpec.LoadBalancerNodeOutboundIPs < 1 {
+		return field.Invalid(fldPath.Child("load_balancer_node_outbound_ips"), networkSpec.LoadBalancerNodeOutboundIPs,
+			"LoadBalancerNodeOutboundIPs value should be greater than 0")
+	}
+
+	if *networkSpec.LoadBalancerNodeOutboundIPs > MaxLoadBalancerOutboundIPs {
+		return field.Invalid(fldPath.Child("load_balancer_node_outbound_ips"), networkSpec.LoadBalancerNodeOutboundIPs,
+			fmt.Sprintf("LoadBalancerNodeOutboundIPs value cannot be greater than %d", MaxLoadBalancerOutboundIPs))
+	}
+
+	return nil
 }

@@ -58,6 +58,10 @@ type NetworkSpec struct {
 	// APIServerLB is the configuration for the control-plane load balancer.
 	// +optional
 	APIServerLB LoadBalancerSpec `json:"apiServerLB,omitempty"`
+
+	// LoadBalancerNodeOutboundIPs is the configuration for multiple frontend ips for node outbound load balancer.
+	// +optional
+	LoadBalancerNodeOutboundIPs *int32 `json:"load_balancer_node_outbound_ips,omitempty"`
 }
 
 // VnetSpec configures an Azure virtual network.

@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha3
 
 import (
+	utilconversion "sigs.k8s.io/cluster-api/util/conversion"
 	unsafe "unsafe"
 
 	apiconversion "k8s.io/apimachinery/pkg/conversion"
@@ -30,13 +31,35 @@ import (
 // ConvertTo converts this AzureCluster to the Hub version (v1alpha4).
 func (src *AzureCluster) ConvertTo(dstRaw conversion.Hub) error { // nolint
 	dst := dstRaw.(*infrav1alpha4.AzureCluster)
-	return Convert_v1alpha3_AzureCluster_To_v1alpha4_AzureCluster(src, dst, nil)
+
+	if err := Convert_v1alpha3_AzureCluster_To_v1alpha4_AzureCluster(src, dst, nil); err != nil {
+		return err
+	}
+
+	// Manually restore data.
+	restored := &infrav1alpha4.AzureCluster{}
+	if ok, err := utilconversion.UnmarshalData(src, restored); err != nil || !ok {
+		return err
+	}
+
+	dst.Spec.NetworkSpec.LoadBalancerNodeOutboundIPs = restored.Spec.NetworkSpec.LoadBalancerNodeOutboundIPs
+
+	return nil
 }
 
 // ConvertFrom converts from the Hub version (v1alpha4) to this version.
 func (dst *AzureCluster) ConvertFrom(srcRaw conversion.Hub) error { // nolint
 	src := srcRaw.(*infrav1alpha4.AzureCluster)
-	return Convert_v1alpha4_AzureCluster_To_v1alpha3_AzureCluster(src, dst, nil)
+	if err := Convert_v1alpha4_AzureCluster_To_v1alpha3_AzureCluster(src, dst, nil); err != nil {
+		return err
+	}
+
+	// Preserve Hub data on down-conversion.
+	if err := utilconversion.MarshalData(src, dst); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // ConvertTo converts this AzureClusterList to the Hub version (v1alpha4).

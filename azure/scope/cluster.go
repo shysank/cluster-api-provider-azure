@@ -115,6 +115,9 @@ func (s *ClusterScope) Authorizer() autorest.Authorizer {
 
 // PublicIPSpecs returns the public IP specs.
 func (s *ClusterScope) PublicIPSpecs() []azure.PublicIPSpec {
+	var publicIPSpecs []azure.PublicIPSpec
+
+	// Public IP specs for control plane lb
 	var controlPlaneOutboundIP azure.PublicIPSpec
 	if s.IsAPIServerPrivate() {
 		controlPlaneOutboundIP = azure.PublicIPSpec{
@@ -127,13 +130,26 @@ func (s *ClusterScope) PublicIPSpecs() []azure.PublicIPSpec {
 			IsIPv6:  false, // currently azure requires a ipv4 lb rule to enable ipv6
 		}
 	}
+	publicIPSpecs = append(publicIPSpecs, controlPlaneOutboundIP)
 
-	return []azure.PublicIPSpec{
-		controlPlaneOutboundIP,
-		{
+	// Public IP specs for node outbound lb
+	loadBalancerNodeOutboundIPs := s.LoadBalancerNodeOutboundIPs()
+	var nodeOutboundIPSpecs []azure.PublicIPSpec
+
+	if loadBalancerNodeOutboundIPs == 1 {
+		nodeOutboundIPSpecs = append(nodeOutboundIPSpecs, azure.PublicIPSpec{
 			Name: azure.GenerateNodeOutboundIPName(s.ClusterName()),
-		},
+		})
+	} else {
+		for i := 0; i < int(loadBalancerNodeOutboundIPs); i++ {
+			publicIPSpecs = append(publicIPSpecs, azure.PublicIPSpec{
+				Name: azure.WithIndex(azure.GenerateNodeOutboundIPName(s.ClusterName()), i+1),
+			})
+		}
 	}
+	publicIPSpecs = append(publicIPSpecs, nodeOutboundIPSpecs...)
+
+	return publicIPSpecs
 }
 
 // LBSpecs returns the load balancer specs.
@@ -152,19 +168,12 @@ func (s *ClusterScope) LBSpecs() []azure.LBSpec {
 		},
 		{
 			// Public Node outbound LB
-			Name: s.NodeOutboundLBName(),
-			FrontendIPConfigs: []infrav1.FrontendIP{
-				{
-					Name: azure.GenerateFrontendIPConfigName(s.NodeOutboundLBName()),
-					PublicIP: &infrav1.PublicIPSpec{
-						Name: azure.GenerateNodeOutboundIPName(s.ClusterName()),
-					},
-				},
-			},
-			Type:            infrav1.Public,
-			SKU:             infrav1.SKUStandard,
-			BackendPoolName: s.OutboundPoolName(s.NodeOutboundLBName()),
-			Role:            infrav1.NodeOutboundRole,
+			Name:              s.NodeOutboundLBName(),
+			FrontendIPConfigs: s.nodeOutboundFrontendIPConfigs(),
+			Type:              infrav1.Public,
+			SKU:               infrav1.SKUStandard,
+			BackendPoolName:   s.OutboundPoolName(s.NodeOutboundLBName()),
+			Role:              infrav1.NodeOutboundRole,
 		},
 	}
 
@@ -190,6 +199,31 @@ func (s *ClusterScope) LBSpecs() []azure.LBSpec {
 	})
 
 	return specs
+}
+
+// nodeOutboundFrontendIPConfigs returns frontend ip configs for node outbound lb.
+func (s *ClusterScope) nodeOutboundFrontendIPConfigs() []infrav1.FrontendIP {
+	if s.LoadBalancerNodeOutboundIPs() == 1 {
+		return []infrav1.FrontendIP{
+			{
+				Name: azure.GenerateFrontendIPConfigName(s.NodeOutboundLBName()),
+				PublicIP: &infrav1.PublicIPSpec{
+					Name: azure.GenerateNodeOutboundIPName(s.ClusterName()),
+				},
+			},
+		}
+	}
+
+	frontendIPs := make([]infrav1.FrontendIP, s.LoadBalancerNodeOutboundIPs())
+	for i := 0; i < int(s.LoadBalancerNodeOutboundIPs()); i++ {
+		frontendIPs[i] = infrav1.FrontendIP{
+			Name: azure.WithIndex(azure.GenerateFrontendIPConfigName(s.NodeOutboundLBName()), i+1),
+			PublicIP: &infrav1.PublicIPSpec{
+				Name: azure.WithIndex(azure.GenerateNodeOutboundIPName(s.ClusterName()), i+1),
+			},
+		}
+	}
+	return frontendIPs
 }
 
 // RouteTableSpecs returns the node route table
@@ -392,6 +426,14 @@ func (s *ClusterScope) Location() string {
 // AvailabilitySetEnabled informs machines that they should be part of an Availability Set.
 func (s *ClusterScope) AvailabilitySetEnabled() bool {
 	return len(s.AzureCluster.Status.FailureDomains) == 0
+}
+
+// LoadBalancerNodeOutboundIPs returns the number node outbound ips that needs to be configured in the load balancer.
+func (s *ClusterScope) LoadBalancerNodeOutboundIPs() int32 {
+	if s.AzureCluster.Spec.NetworkSpec.LoadBalancerNodeOutboundIPs == nil {
+		return 1
+	}
+	return *s.AzureCluster.Spec.NetworkSpec.LoadBalancerNodeOutboundIPs
 }
 
 // GenerateFQDN generates a fully qualified domain name, based on a hash, cluster name and cluster location.

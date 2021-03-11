@@ -1363,6 +1363,7 @@ func autoConvert_v1alpha4_NetworkSpec_To_v1alpha3_NetworkSpec(in *v1alpha4.Netwo
 	if err := Convert_v1alpha4_LoadBalancerSpec_To_v1alpha3_LoadBalancerSpec(&in.APIServerLB, &out.APIServerLB, s); err != nil {
 		return err
 	}
+	// WARNING: in.LoadBalancerNodeOutboundIPs requires manual conversion: does not exist in peer-type
 	return nil
 }
 
