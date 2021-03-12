@@ -269,9 +269,6 @@ func (m *MachineScope) AvailabilityZone() string {
 	if m.AzureMachine.Spec.FailureDomain != nil {
 		return *m.AzureMachine.Spec.FailureDomain
 	}
-	if m.AzureMachine.Spec.AvailabilityZone.ID != nil {
-		return *m.AzureMachine.Spec.AvailabilityZone.ID
-	}
 
 	return ""
 }
